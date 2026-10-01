@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>City of Buenavista — Business Permit Portal</title>
+    <style>
+        :root {
+            --ink: #1C3144;
+            --teal: #14524A;
+            --teal-dark: #0D3A34;
+            --gold: #A97C24;
+            --paper: #EFF2ED;
+            --card: #FFFFFF;
+            --line: #D8DED6;
+            --success: #3F7D5C;
+            --alert: #C97A2B;
+            --muted: #5B6B63;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            margin: 0;
+            padding: 0 20px 60px;
+        }
+        .wrap { max-width: 920px; margin: 0 auto; }
+
+        .letterhead {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 32px 0 24px;
+            border-bottom: 2px solid var(--ink);
+            margin-bottom: 32px;
+        }
+        .seal {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Georgia, "Times New Roman", serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+        .letterhead-text p {
+            margin: 0;
+            font-size: 12.5px;
+            letter-spacing: 0.02em;
+            color: var(--muted);
+        }
+        .letterhead-text h1 {
+            margin: 2px 0 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-weight: 700;
+            font-size: 26px;
+            color: var(--ink);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 760px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 28px;
+        }
+        .card h2 {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 19px;
+            margin: 0 0 20px;
+            color: var(--ink);
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 6px;
+            margin-top: 16px;
+        }
+        label:first-of-type { margin-top: 0; }
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--ink);
+            background: #FBFCFA;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--teal);
+        }
+
+        button {
+            margin-top: 24px;
+            width: 100%;
+            padding: 12px;
+            background: var(--teal);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14.5px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover { background: var(--teal-dark); }
+
+        .stage-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        .stage {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 12px 0;
+            position: relative;
+        }
+        .stage:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            left: 13px;
+            top: 40px;
+            width: 1px;
+            height: calc(100% - 12px);
+            background: var(--line);
+        }
+        .stage-dot {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            border: 2px solid var(--line);
+            background: var(--card);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700;
+            color: var(--muted);
+            flex-shrink: 0;
+            transition: all 0.2s;
+            z-index: 1;
+        }
+        .stage.done .stage-dot {
+            background: var(--teal);
+            border-color: var(--teal);
+            color: white;
+        }
+        .stage-body h3 {
+            margin: 2px 0 2px;
+            font-size: 14px;
+            color: var(--ink);
+        }
+        .stage-body p {
+            margin: 0;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+        .stage.done .stage-body h3 { color: var(--teal-dark); }
+
+        .badge {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .badge.approved { background: #E4F0E9; color: var(--success); }
+        .badge.review { background: #FBEEE0; color: var(--alert); }
+        .badge.waiting { background: #EEF0EC; color: var(--muted); }
+
+        details {
+            margin-top: 28px;
+        }
+        summary {
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            padding: 8px 0;
+        }
+        #logbox {
+            background: #10221D;
+            color: #9AD8B8;
+            padding: 12px;
+            height: 220px;
+            overflow-y: auto;
+            font-family: "SF Mono", Consolas, monospace;
+            font-size: 12px;
+            border-radius: 4px;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="letterhead">
+        <div class="seal">CB</div>
+        <div class="letterhead-text">
+            <p>Local Government of Buenavista</p>
+            <h1>Business Permit Portal</h1>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>New application</h2>
+            <form action="/submit-permit" method="post">
+                <label>Business name</label>
+                <input type="text" name="businessName" required placeholder="e.g. Buenavista Sari-Sari Store">
+
+                <label>Owner</label>
+                <input type="text" name="owner" required placeholder="e.g. Juan Dela Cruz">
+
+                <label>Barangay</label>
+                <input type="text" name="barangay" required placeholder="e.g. Poblacion">
+
+                <label>Business location</label>
+                <select name="location">
+                    <option value="Buenavista">Within Buenavista</option>
+                    <option value="Outside">Outside Buenavista</option>
+                </select>
+
+                <button type="submit">Submit application</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Application status</h2>
+            <div class="stage-list" id="stageList">
+                <div class="stage" data-task="1">
+                    <div class="stage-dot">1</div>
+                    <div class="stage-body">
+                        <h3>Received</h3>
+                        <p>Logged at the permit office</p>
+                    </div>
+                </div>
+                <div class="stage" data-task="2">
+                    <div class="stage-dot">2</div>
+                    <div class="stage-body">
+                        <h3>Routed</h3>
+                        <p>Assigned to local or external office</p>
+                    </div>
+                </div>
+                <div class="stage" data-task="3">
+                    <div class="stage-dot">3</div>
+                    <div class="stage-body">
+                        <h3>Aggregated</h3>
+                        <p>Form, clearance and payment combined</p>
+                    </div>
+                </div>
+                <div class="stage" data-task="4">
+                    <div class="stage-dot">4</div>
+                    <div class="stage-body">
+                        <h3>Converted</h3>
+                        <p>Prepared for the online portal</p>
+                    </div>
+                </div>
+                <div class="stage" data-task="5">
+                    <div class="stage-dot">5</div>
+                    <div class="stage-body">
+                        <h3>Decision</h3>
+                        <p>Approved or sent for manual review</p>
+                    </div>
+                </div>
+            </div>
+            <span class="badge waiting" id="resultBadge">Waiting for a submission</span>
+
+            <details>
+                <summary>View technical log</summary>
+                <div id="logbox">Waiting for activity...</div>
+            </details>
+        </div>
+    </div>
+</div>
+
+<script>
+    function refreshLogs() {
+        fetch('/api/logs')
+            .then(r => r.json())
+            .then(logs => {
+                document.getElementById('logbox').innerHTML = logs.length
+                    ? logs.join('<br>')
+                    : 'Waiting for activity...';
+
+                document.querySelectorAll('.stage').forEach(s => s.classList.remove('done'));
+                const recent = logs.slice(0, 6);
+                recent.forEach(line => {
+                    const match = line.match(/Task (\d)/);
+                    if (match) {
+                        const el = document.querySelector('.stage[data-task="' + match[1] + '"]');
+                        if (el) el.classList.add('done');
+                    }
+                });
+
+                const badge = document.getElementById('resultBadge');
+                if (logs.length === 0) {
+                    badge.textContent = 'Waiting for a submission';
+                    badge.className = 'badge waiting';
+                } else if (logs[0].includes('PERMIT APPROVED')) {
+                    badge.textContent = 'Permit approved';
+                    badge.className = 'badge approved';
+                } else if (logs[0].includes('FLAGGED')) {
+                    badge.textContent = 'Sent for manual review';
+                    badge.className = 'badge review';
+                } else {
+                    badge.textContent = 'Processing...';
+                    badge.className = 'badge waiting';
+                }
+            });
+    }
+    setInterval(refreshLogs, 2000);
+    refreshLogs();
+</script>
+</body>
+</html>

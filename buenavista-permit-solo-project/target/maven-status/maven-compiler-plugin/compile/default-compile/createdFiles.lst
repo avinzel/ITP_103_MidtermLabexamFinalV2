@@ -1,0 +1,8 @@
+com\example\demo\DemoApplication.class
+com\example\demo\Task4TranslatorRoute.class
+com\example\demo\Task5ErrorHandlingRoute.class
+com\example\demo\PermitController.class
+com\example\demo\Task2ContentRouterRoute.class
+com\example\demo\LogStore.class
+com\example\demo\Task3AggregatorRoute.class
+com\example\demo\Task1MessageChannelRoute.class
